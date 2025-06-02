@@ -44,7 +44,7 @@ struct NeuralFM : engine::Module {
     float inputTrigger = 0.0f;
     float weights1[500]; 
     float weights2[1000];
-    float weights3[10]; 
+    float weights3[1000]; 
 
     NeuralFM() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -65,8 +65,8 @@ struct NeuralFM : engine::Module {
         for (int i = 0; i < 1000; i++) {
             weights2[i] = 0.5f + random::uniform() * 1.0f;
         }
-        for (int i = 0; i < 10; i++) {
-            weights3[i] = 0.5f + random::uniform() * 1.0f;
+        for (int i = 0; i < 1000; i++) {
+        weights3[i] = 0.5f + random::uniform() * 1.0f;
         }
     }
 
@@ -101,29 +101,38 @@ struct NeuralFM : engine::Module {
             }
 
           
-            float group1Sum = 0.0f; // 10 neurons, controlled by SWITCH3_PARAM
+            float group1Sum = 0.0f; 
             for (int i = 0; i < 10; i++) {
                 float feedback = params[SWITCH3_PARAM].getValue() > 0.5f ? lastMod * 0.8f : 0.0f;
                 group1Sum += weights1[i] * std::tanh(pitch + feedback + random::uniform() * 0.1f); // 
             }
             
-            group1Sum /= 100.0f; // Normalize
+            group1Sum /= 100.0f; 
 
-            float group2Sum = 0.0f; // 1000 neurons, controlled by SWITCH4_PARAM
+            float group2Sum = 0.0f; 
             for (int i = 0; i < 1000; i++) {
                 float neuron = params[SWITCH4_PARAM].getValue() > 0.5f ? std::tanh(chaosFactor * 2.0f + random::uniform() * 0.1f) : 0.0f;
                 group2Sum += weights2[i] * neuron;
             }
             group2Sum /= 1000.0f;
 
-            float layer2Sum = 0.0f; // 100 neurones
-            for (int i = 0; i < 100; i++) {
-                layer2Sum += weights3[i] * std::tanh(group1Sum * 0.5f + group2Sum * 0.5f + random::uniform() * 0.1f);
-            }
-            layer2Sum /= 100.0f;
+           
+            int neuronCount = 10; 
 
-            // Combine groups into neuralOutput
-            neuralOutput = layer2Sum * 3.0f;
+            if (params[SWITCH6_PARAM].getValue() > 0.5f) {
+                neuronCount = 1000;  
+            } else if (params[SWITCH5_PARAM].getValue() > 0.5f) {
+                neuronCount = 100;   
+            }
+
+            float layer2Sum = 0.0f;
+            for (int i = 0; i < neuronCount; i++) {
+                layer2Sum += weights3[i] * std::tanh(group1Sum * 0.5f + group2Sum * 0.5f + random::uniform() * 0.1f);
+                }
+            layer2Sum /= neuronCount;
+
+           
+            neuralOutput = layer2Sum * 5.0f;
 
 
             float mod;

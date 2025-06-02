@@ -1,8 +1,8 @@
 {
     "slug": "NeuralFM",
     "name": "NeuralFM",
-    "version": "1.0.0",
-    "license": "proprietary",
+    "version": "2.0.0",
+    "license": "GPL-3.0-or-later",
     "brand": "AC Audiolab",
     "author": "AC Audiolab",
     "authorEmail": "contact@blueshape.io",
