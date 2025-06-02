@@ -14,7 +14,7 @@
         "slug": "NeuralFM",
         "name": "NeuralFM",
         "description": "FM neural chaos synth",
-        "tags": ["Synth voice", "Oscillator"]
+        "tags": ["Oscillator", "Synth voice", "FM", "Experimental", "Chaos"]
       }
     ]
   }
