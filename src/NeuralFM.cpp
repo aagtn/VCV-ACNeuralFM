@@ -44,7 +44,7 @@ struct NeuralFM : engine::Module {
     float inputTrigger = 0.0f;
     float weights1[500]; 
     float weights2[1000];
-    float weights3[100]; 
+    float weights3[10]; 
 
     NeuralFM() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
