@@ -1,0 +1,40 @@
+                +------------------------+
+PITCH INPUT --->|   Pitch (CV) + Octave  |<---- OCTAVE_CV_INPUT
+                |   => Frequency (Hz)    |
+                +------------------------+
+                            |
+                            v
+              +--------------------------+
+              | Chaos Factor + Switches  |<--- CHAOS_PARAM + SWITCH1
+              | => Chaos Modulation      |
+              +--------------------------+
+                            |
+                            v
+         +------------------------------------------+
+         |        NEURAL NETWORK SIMULATION         |
+         |------------------------------------------|
+         |  Group 1: 10 Neurons   <---- SWITCH3     |
+         |  Group 2: 1000 Neurons <---- SWITCH4     |
+         |  Layer 2: 100 Neurons                    |
+         |  => neuralOutput (modulating signal)     |
+         +------------------------------------------+
+                            |
+                            v
+            +------------------------------+
+            | FM Modulation Core           |
+            |------------------------------|
+            | SWITCH2: FM topology         |
+            | Phase Modulator + Carrier    |
+            | (sine wave FM synthesis)     |
+            +------------------------------+
+                            |
+                            v
+            +------------------------------+
+            |    Output (audio signal)     |
+            |   (5V peak sine modulated)   |
+            +------------------------------+
+                            |
+                            v
+                   +----------------+
+                   |  AUDIO OUTPUT  |
+                   +----------------+

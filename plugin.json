@@ -1,0 +1,20 @@
+{
+    "slug": "NeuralFM",
+    "name": "NeuralFM",
+    "version": "2.0.0",
+    "license": "proprietary",
+    "brand": "AC Audiolab",
+    "author": "AC Audiolab",
+    "authorEmail": "aurelien.argentin@blueshape.io",
+    "pluginUrl": "",
+    "manualUrl": "",
+    "sourceUrl": "",
+    "modules": [
+      {
+        "slug": "NeuralFM",
+        "name": "NeuralFM",
+        "description": "FM neural chaos synth",
+        "tags": ["Synth voice", "Oscillator"]
+      }
+    ]
+  }
