@@ -15,7 +15,9 @@ struct NeuralFM : engine::Module {
         SWITCH5_PARAM,
         SWITCH6_PARAM,
         BYPASS_PARAM,
-        NUM_PARAMS
+        CHAOS_SHAPE_PARAM,
+        NUM_PARAMS,
+        
     };
     enum InputIds {
         PITCH_INPUT,
@@ -46,11 +48,14 @@ struct NeuralFM : engine::Module {
     float weights2[1000];
     float weights3[1000]; 
 
+    float logisticState = 0.5f;
+
     NeuralFM() {
         config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
         configParam(CHAOS_PARAM, 0.0f, 1.0f, 0.0f, "Chaos Factor");
         configParam(OCTAVE_PARAM, -2.0f, 2.0f, 0.0f, "Octave Shift");
         configSwitch(SWITCH1_PARAM, 0.0f, 1.0f, 0.0f, "Chaos Mode", {"Linear", "Exp"});
+        configSwitch(CHAOS_SHAPE_PARAM, 0.0f, 2.0f, 0.0f, "Chaos Shape", {"White Noise", "Sine Noise", "Logistic Map"});
         configSwitch(SWITCH2_PARAM, 0.0f, 1.0f, 0.0f, "FM Topology", {"Parallel", "Cascade"});
         configSwitch(SWITCH3_PARAM, 0.0f, 1.0f, 0.0f, "Feedback Neuron", {"Off", "On"});
         configSwitch(SWITCH4_PARAM, 0.0f, 1.0f, 0.0f, "Mod Invert", {"Normal", "Inverted"});
@@ -64,19 +69,27 @@ struct NeuralFM : engine::Module {
         }
         for (int i = 0; i < 1000; i++) {
             weights2[i] = 0.5f + random::uniform() * 1.0f;
+            weights3[i] = 0.5f + random::uniform() * 1.0f;
         }
-        for (int i = 0; i < 1000; i++) {
-        weights3[i] = 0.5f + random::uniform() * 1.0f;
-        }
+    
     }
 
     void process(const ProcessArgs& args) override {
         float octaveShift = params[OCTAVE_PARAM].getValue();
         float octaveCV = inputs[OCTAVE_CV_INPUT].isConnected() ? inputs[OCTAVE_CV_INPUT].getVoltage() : 0.0f;
         float pitch = inputs[PITCH_INPUT].getVoltage();
+
         freq = 261.63f * std::pow(2.0f, pitch) * std::pow(2.0f, octaveShift + octaveCV);
 
+        
         chaosFactor = params[CHAOS_PARAM].getValue();
+
+        float chaosShape = params[SWITCH1_PARAM].getValue();
+        if (chaosShape > 0.5f) {
+            logisticState = chaosFactor * logisticState * (1.0f - logisticState);
+        } else {
+            logisticState = 0.5f;
+        }
 
         // Detect input changes
         float pitchDelta = std::abs(pitch - lastPitch);
@@ -180,6 +193,8 @@ struct NeuralScreen : TransparentWidget {
             return;
         }
 
+        //int bypass = module->params[NeuralFM::BYPASS_PARAM].getValue() < 0.5f;
+
         float phaseCar = module->phaseCar;
         float phaseMod = module->phaseMod;
         float chaos = module->chaosFactor;
@@ -200,7 +215,7 @@ struct NeuralScreen : TransparentWidget {
 
         
         float centerX = 25.0f;
-        float centerY = 15.0f;
+        float centerY = 15.0f ;
         float baseRadius = 15.0f * radiusFactor * (1.0f + trigger * 0.3f + pulse * 0.2f); 
 
         for (int y = 0; y < 30; y++) {
@@ -225,7 +240,7 @@ struct NeuralScreen : TransparentWidget {
                 float waveHeight = (baseWave + modWave) * 10.0f * (1.0f - depth) ; 
 
                 
-                float waveY = centerY + (yNorm * baseRadius) + waveHeight + 15;
+                float waveY = centerY + (yNorm * baseRadius) + waveHeight + 15 ;
                 int waveYGrid = (int)(waveY / 2.0f);
 
                 
@@ -248,6 +263,7 @@ struct NeuralScreen : TransparentWidget {
     }
 };
 
+
 struct NeuralFMWidget : app::ModuleWidget {
     NeuralFMWidget(NeuralFM* module) {
         setModule(module);
@@ -256,6 +272,8 @@ struct NeuralFMWidget : app::ModuleWidget {
         setPanel(createPanel(asset::plugin(pluginInstance, "res/NeuralFM.svg")));
 
         addParam(createParam<componentlibrary::RoundBlackKnob>(Vec(18, 200), module, NeuralFM::CHAOS_PARAM));
+        //addParam(createParam<componentlibrary::CKSS>(Vec(58, 220), module, NeuralFM::CHAOS_SHAPE_PARAM));
+        addParam(createParam<componentlibrary::NKK>(Vec(58, 200), module, NeuralFM::CHAOS_SHAPE_PARAM));
         addParam(createParam<componentlibrary::RoundBlackKnob>(Vec(56, 273), module, NeuralFM::OCTAVE_PARAM));
 
         addParam(createParam<componentlibrary::CKSS>(Vec(15, 65), module, NeuralFM::SWITCH1_PARAM));
@@ -275,10 +293,10 @@ struct NeuralFMWidget : app::ModuleWidget {
 
         addParam(createParam<componentlibrary::CKSS>(Vec(92, 325), module, NeuralFM::BYPASS_PARAM));
 
-        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(1, 1)));
-        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(1, 364)));
-        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(104, 1)));
-        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(104, 364)));
+        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(15, 1)));
+        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(15, 364)));
+        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(105 - 15, 1)));
+        addChild(createWidget<componentlibrary::ScrewBlack>(Vec(105 -15 , 364)));
     }
 };
 
